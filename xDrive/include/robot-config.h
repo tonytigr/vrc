@@ -8,7 +8,6 @@ extern motor LFMotor;
 extern motor LBMotor;
 extern motor RFMotor;
 extern motor RBMotor;
-extern gyro GyroA;
 extern controller Controller1;
 #define maxMotorSpeed 	127
 #define numberOfMotors 	4
