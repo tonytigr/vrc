@@ -12,7 +12,6 @@ motor LFMotor = motor(PORT2, ratio18_1, false);
 motor LBMotor = motor(PORT3, ratio18_1, false);
 motor RFMotor = motor(PORT5, ratio18_1, false);
 motor RBMotor = motor(PORT6, ratio18_1, false);
-gyro GyroA = gyro(Brain.ThreeWirePort.A);
 controller Controller1 = controller(primary);
 
 // VEXcode generated functions
