@@ -14,7 +14,6 @@
 // LBMotor              motor         3               
 // RFMotor              motor         5               
 // RBMotor              motor         6               
-// GyroA                gyro          A               
 // Controller1          controller                    
 // ---- END VEXCODE CONFIGURED DEVICES ----
 
