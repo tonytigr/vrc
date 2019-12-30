@@ -58,28 +58,30 @@ void pre_auton(void) {
 void autonomous(void) {
   // ..........................................................................
   // Insert autonomous user code here.
+  // void moveCordinateGyro(double x1, double y1, int maxTurnPower, int minTurnPower, float kp);
+  // void TurnWithGyro(int targetDegrees, int maxTurnPower, int minTurnPower, float kp); 
   // ..........................................................................
-  vexcodeInit();
+  //In Competition, pre_auton() will be run before autonomous()
+  pre_auton();
+  //print
   Controller1.Screen.setCursor( 1, 1 );
   Controller1.Screen.print("autonomous running...");
-  //turn  degrees clockwise
-  //TurnWithGyro( -90, 20, 2 ,0.4);
   //move to x,y cm top right at speed percent
-  //moveCordinate(0,  30, 35);
-  //moveCordinate(0,  -30, 35);
- // moveCordinate(-10, 10, 50 );
-  //moveCordinateWithPIDandGyro(-30, 0, 50, 2, 0.2 );
-  TurnWithGyro( -360, 40, 2 ,0.4);
-  //moveCordinateWithPIDandGyro(-30, 0, 50, 2, 0.2 );
- // TurnWithGyro( 360, 40, 2 ,0.4);
-  //moveCordinateWithPIDandGyro(-30, 0, 50, 2, 0.2 );
-  //TurnWithGyro( -90, 40, 2 ,0.4);
-  //moveCordinateWithPIDandGyro(-30, 0, 50, 2, 0.2 );
-  //TurnWithGyro( -90, 40, 2 ,0.4);
+  moveCordinateGyro(0, 30, 50, 2, 0.3 );
   //turn  degrees clockwise
-  //TurnWithGyro( 90, 20, 2 ,0.4);
+  TurnWithGyro( -90, 40, 2 ,0.4);
   //move to x,y cm top right at speed percent
-  //moveCordinate(20,  -10, 20);
+  moveCordinateGyro(0, 30, 50, 2, 0.3 );
+  //turn  degrees clockwise
+  TurnWithGyro( -90, 40, 2 ,0.4);
+  //move to x,y cm top right at speed percent
+  moveCordinateGyro(0, 30, 50, 2, 0.3 );
+  //turn  degrees clockwise
+  TurnWithGyro( -90, 40, 2 ,0.4);
+  //move to x,y cm top right at speed percent
+  moveCordinateGyro(0, 30, 50, 2, 0.3 );
+  //turn  degrees clockwise
+  TurnWithGyro( -90, 40, 2 ,0.4);
    }
 
 /*---------------------------------------------------------------------------*/

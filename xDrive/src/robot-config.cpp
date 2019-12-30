@@ -71,7 +71,7 @@ double getJoyPolarRadians()
 double getJoyPolarSpeed()
 {
 	double tmpSpeed = sqrt((Controller1.Axis1.value() * Controller1.Axis1.value()) + (Controller1.Axis2.value() * Controller1.Axis2.value()));
-	tmpSpeed /= maxMotorSpeed;
+	tmpSpeed /= MAX_MOTOR_SPEED;
 	tmpSpeed = tmpSpeed > 1 ? 1 : tmpSpeed;
 	return tmpSpeed;
 }
@@ -91,10 +91,10 @@ void RadianOutput(double radians, double speed, int rotation)
 {
 	if (speed > 0)
 	{
-		double frontLeftOutput	=	 maxMotorSpeed * cos((PI / 4) - radians) ,
-		       frontRightOutput =	 -maxMotorSpeed * cos((PI / 4) + radians) ,
-		       rearRightOutput	=	 -maxMotorSpeed * cos((PI / 4) - radians) ,
-		       rearLeftOutput	=    maxMotorSpeed * cos((PI / 4) + radians);
+		double frontLeftOutput	=	 MAX_MOTOR_SPEED * cos((PI / 4) - radians) ,
+		       frontRightOutput =	 -MAX_MOTOR_SPEED * cos((PI / 4) + radians) ,
+		       rearRightOutput	=	 -MAX_MOTOR_SPEED * cos((PI / 4) - radians) ,
+		       rearLeftOutput	=    MAX_MOTOR_SPEED * cos((PI / 4) + radians);
 
 		frontLeftOutput += rotation;
 		frontRightOutput += rotation;
@@ -107,7 +107,7 @@ void RadianOutput(double radians, double speed, int rotation)
     {
       if (output[i] > maxValue) maxValue = output[i];
     }
-		speed *= maxMotorSpeed / maxValue;
+		speed *= MAX_MOTOR_SPEED / maxValue;
 
 		frontLeftOutput *= speed;
 		frontRightOutput *= speed;
@@ -139,8 +139,8 @@ double getDegrees(double centimeters){
     return centimeters*degreePerCM;
 
 }
-//**------------------- robot moves to (x1, y1) at the speed percentage--------------------------- **//
-void moveCordinate(double x1, double y1, double speedPercent){
+//**------------------- robot simple moves to (x1, y1) at the speed percentage--------------------------- **//
+void moveCordinate(double x1, double y1, double power){
     Controller1.Screen.setCursor( 2, 1 );
     Controller1.Screen.print("to x1= %.1f y1= %.1f",x1,y1);
     double radians = PI/2-atan2(y1, x1);
@@ -148,47 +148,63 @@ void moveCordinate(double x1, double y1, double speedPercent){
 		RFMotor.resetPosition();
 		LBMotor.resetPosition();
 		RBMotor.resetPosition();
-		LFMotor.rotateTo( getDegrees( sqrt(2)*(  x1+y1))/2, rotationUnits::deg , speedPercent*cos((PI / 4) - radians), velocityUnits::pct, false);
-		RFMotor.rotateTo( getDegrees( sqrt(2)*(  x1-y1))/2, rotationUnits::deg , speedPercent*cos((PI / 4) + radians), velocityUnits::pct, false);
-		LBMotor.rotateTo( getDegrees( sqrt(2)*( -x1+y1))/2, rotationUnits::deg , speedPercent*cos((PI / 4) + radians), velocityUnits::pct, false);
-		RBMotor.rotateTo( getDegrees( sqrt(2)*( -x1-y1))/2, rotationUnits::deg , speedPercent*cos((PI / 4) - radians), velocityUnits::pct, true);
+		LFMotor.rotateTo( getDegrees( sqrt(2)*(  x1+y1))/2, rotationUnits::deg , power*cos((PI / 4) - radians), velocityUnits::pct, false);
+		RFMotor.rotateTo( getDegrees( sqrt(2)*(  x1-y1))/2, rotationUnits::deg , power*cos((PI / 4) + radians), velocityUnits::pct, false);
+		LBMotor.rotateTo( getDegrees( sqrt(2)*( -x1+y1))/2, rotationUnits::deg , power*cos((PI / 4) + radians), velocityUnits::pct, false);
+		RBMotor.rotateTo( getDegrees( sqrt(2)*( -x1-y1))/2, rotationUnits::deg , power*cos((PI / 4) - radians), velocityUnits::pct, true);
 }
-//**------------------- robot moves to (x1, y1) at maxTurnPower and stops use PID --------------------------- **//
-void moveCordinateWithPIDandGyro(double x1, double y1, int maxTurnPower, int minTurnPower, float kp){
-    TurnGyroSmart.resetRotation();
-    double targetDegreesLF = getDegrees( sqrt(2)*(  x1+y1))/2;
-    double targetDegreesRF = getDegrees( sqrt(2)*(  x1-y1))/2;
-    double targetDegrees = (targetDegreesLF<0?-targetDegreesLF:targetDegreesLF)>(targetDegreesRF<0?-targetDegreesRF:targetDegreesRF)?targetDegreesLF:targetDegreesRF ;
-    motor targetMotor = (targetDegreesLF<0?-targetDegreesLF:targetDegreesLF)>(targetDegreesRF<0?-targetDegreesRF:targetDegreesRF)?LFMotor:RFMotor ;
-    double error = targetDegrees ;
-    double dirError = 0 ;
-    double speedPercent;
-    double rotatedDegrees;
+//**------------------- robot moves to (x1, y1) at maxTurnPower and slow down with calculated speed --------------------------- **//
+void moveCordinateGyro(double x1, double y1, int maxTurnPower, int minTurnPower, float kp){
+    //target heading radian/degree
     double radians = PI/2-atan2(y1, x1);
     double heading = radians * 180/PI;
+    //reset gyro current position
+    TurnGyroSmart.resetRotation();
+    //calculate LF and RF wheel travel degrees
+    double targetDistanceDegreesLF = getDegrees( sqrt(2)*(x1+y1)/2);
+    double targetDistanceDegreesRF = getDegrees( sqrt(2)*(x1-y1)/2);
+    //select the wheel/motor which travel longer to calculate
+    double targetDistanceDegrees = (targetDistanceDegreesLF<0?-targetDistanceDegreesLF:targetDistanceDegreesLF)>(targetDistanceDegreesRF<0?-targetDistanceDegreesRF:targetDistanceDegreesRF)?targetDistanceDegreesLF:targetDistanceDegreesRF ;
+    motor targetMotor = (targetDistanceDegreesLF<0?-targetDistanceDegreesLF:targetDistanceDegreesLF)>(targetDistanceDegreesRF<0?-targetDistanceDegreesRF:targetDistanceDegreesRF)?LFMotor:RFMotor ;
+    //error variable
+    double distanceError = targetDistanceDegrees ;
+    double rotationError = 0 ;
+    double radianError = 0 ;
+    //calculated speed
+    double calculatedSpeed;
+    //print targeted degrees and targeted distance
     Controller1.Screen.setCursor( 1, 1 );
-    Controller1.Screen.print("h,t %.1f %.1f",heading,targetDegrees);
+    Controller1.Screen.print("h,t %.1f %.1f",heading,targetDistanceDegrees);
+    //reset motor position
 		LFMotor.resetPosition();
 		RFMotor.resetPosition();
 		LBMotor.resetPosition();
 		RBMotor.resetPosition();
-    while ((error<0?-error:error)>2){
-      if((error<0?-error:error) >= 120)
-          speedPercent = maxTurnPower ;
+    //check if distance error is within acceptance
+    while ((distanceError<0?-distanceError:distanceError) > ACCEPTED_DISTANCE_ERROR){
+      if((distanceError<0?-distanceError:distanceError) >= SLOW_DOWN_DISTANCE)
+          //use max power before slow down distance
+          calculatedSpeed = maxTurnPower ;
       else{
-          speedPercent = (error<0?-1:1) * error * kp +  minTurnPower;
+          //use calculated power within slow down distance
+          calculatedSpeed = (distanceError<0?-1:1) * distanceError * kp +  minTurnPower;
       }
-      dirError = TurnGyroSmart.rotation()*PI/180;
-      LFMotor.spin(directionType::fwd, speedPercent*cos((PI / 4) - radians - dirError), velocityUnits::pct);
-      RFMotor.spin(directionType::rev, speedPercent*cos((PI / 4) + radians - dirError), velocityUnits::pct);
-      LBMotor.spin(directionType::fwd, speedPercent*cos((PI / 4) + radians - dirError), velocityUnits::pct);
-      RBMotor.spin(directionType::rev, speedPercent*cos((PI / 4) - radians - dirError), velocityUnits::pct);
+      //update rotation error
+      rotationError = TurnGyroSmart.rotation(); 
+      radianError = rotationError * PI/180;
+      //set 4 motor speeds 
+      LFMotor.spin(directionType::fwd, calculatedSpeed * cos((PI / 4) - radians + radianError) - rotationError, velocityUnits::pct);
+      RFMotor.spin(directionType::rev, calculatedSpeed * cos((PI / 4) + radians - radianError) + rotationError, velocityUnits::pct);
+      LBMotor.spin(directionType::fwd, calculatedSpeed * cos((PI / 4) + radians + radianError) - rotationError, velocityUnits::pct);
+      RBMotor.spin(directionType::rev, calculatedSpeed * cos((PI / 4) - radians - radianError) + rotationError, velocityUnits::pct);
       //wait(20, msec); // Sleep the task for a short amount of time to
-      rotatedDegrees=targetMotor.position(rotationUnits::deg);
-		  error = targetDegrees - rotatedDegrees;
+      //update distance error
+		  distanceError = targetDistanceDegrees - targetMotor.position(rotationUnits::deg);
+      //print rotation error and travelled
       Controller1.Screen.setCursor( 2, 1 );
-      Controller1.Screen.print(rotatedDegrees);
+      Controller1.Screen.print("%.1f %.1f",rotationError,distanceError);
     }
+    //all motor stop at the end
     LFMotor.stop();
     RFMotor.stop();
     LBMotor.stop();
@@ -199,40 +215,33 @@ void moveCordinateWithPIDandGyro(double x1, double y1, int maxTurnPower, int min
 // if kp=1,   error 45 degree and minimum power 5 will produce 45*1  + 5 =50   percent 
 // if kp=0.5, error 45 degree and minimum power 5 will produce 45*.5 + 5 =27.5 percent 
 void TurnWithGyro(int targetDegrees, int maxTurnPower, int minTurnPower, float kp){
+  //reset gyro position
   TurnGyroSmart.resetRotation();
   double error = targetDegrees;
-  double speedPercent;
-  double gyroRotation;
+  double calculatedSpeed;
   Controller1.Screen.setCursor( 1, 1 );
-  Controller1.Screen.print(targetDegrees);
-	while((error<0?-error:error) > 1){
-		if((error<0?-error:error) >= 25)
-			speedPercent = (error<0?-1:1) * maxTurnPower ;
-		else{
-        speedPercent = error * kp + (error<0?-1:1) * minTurnPower;
+  Controller1.Screen.print("target=%.1f",targetDegrees);
+  //check if distance error is within acceptance
+	while((error<0?-error:error) > ACCEPTED_ROTATION_ERROR){
+		if((error<0?-error:error) >= SLOW_DOWN_ROTATION_DEGREE){
+      //use max power before slow down rotation degree
+      calculatedSpeed = (error<0?-1:1) * maxTurnPower ;
     }
-    LFMotor.spin(directionType::fwd, speedPercent, percentUnits::pct);
-    RFMotor.spin(directionType::fwd, speedPercent, percentUnits::pct);
-    LBMotor.spin(directionType::fwd, speedPercent, percentUnits::pct);
-    RBMotor.spin(directionType::fwd, speedPercent, percentUnits::pct);
-    wait(20, msec); // Sleep the task for a short amount of time to
-    gyroRotation=TurnGyroSmart.rotation();
-		error = targetDegrees - gyroRotation;
+		else{
+      //use calculated power within slow down distance; error is directional, negative means reverse
+      calculatedSpeed = error * kp + (error<0?-1:1) * minTurnPower;
+    }
+    LFMotor.spin(directionType::fwd, calculatedSpeed, percentUnits::pct);
+    RFMotor.spin(directionType::fwd, calculatedSpeed, percentUnits::pct);
+    LBMotor.spin(directionType::fwd, calculatedSpeed, percentUnits::pct);
+    RBMotor.spin(directionType::fwd, calculatedSpeed, percentUnits::pct);
+    //wait(20, msec); // Sleep the task for a short amount of time to
+		error = targetDegrees - TurnGyroSmart.rotation();
     Controller1.Screen.setCursor( 2, 1 );
-    Controller1.Screen.print(gyroRotation);
+    Controller1.Screen.print("error=%.1f",error);
 	}
   LFMotor.stop();
   RFMotor.stop();
   LBMotor.stop();
   RBMotor.stop();
 }
-//**------------------- turn to target degrees clockwise plus without gyro --------------------------- **//
-// void turn( double turnAngle, double speedPercent){
-//     Controller1.Screen.setCursor( 2, 1 );
-//     Controller1.Screen.print("turning  angle= %d ",turnAngle);
-//     double rotateCM = PI * WHEELS_WIDTH * turnAngle /360;
-// 		LFMotor.rotateFor(directionType::fwd,  getDegrees( rotateCM), rotationUnits::deg, speedPercent, velocityUnits::pct, false);
-// 		RFMotor.rotateFor(directionType::fwd,  getDegrees( rotateCM), rotationUnits::deg, speedPercent, velocityUnits::pct, false);
-// 		LBMotor.rotateFor(directionType::fwd,  getDegrees( rotateCM), rotationUnits::deg, speedPercent, velocityUnits::pct, false);
-// 		RBMotor.rotateFor(directionType::fwd,  getDegrees( rotateCM), rotationUnits::deg, speedPercent, velocityUnits::pct, true);
-// }
