@@ -25,14 +25,15 @@ using namespace vex;
 // A global instance of competition
 competition Competition;
 
-int arm_level=0;
+int idle_flag = 0;
+int arm_level = 0;
 int arm_level_previous = -1;
 //arm position 0 - ground 1 - lower tower 2 - middle tower level
-int arm_position[3] =  {0, 320, 420};
+int arm_position[3] =  {0, 310, 390};
 
 //int intakeDirection = 0;
 
-int tray_max_degrees = 850 ;
+int tray_max_degrees = 880 ;
 int tray_position[3] =  {0, 200, 220};
 // define your global instances of motors and other devices here
 
@@ -81,16 +82,23 @@ void autonomous(void) {
 /*  You must modify the code to add your own robot specific commands here.   */
 /*---------------------------------------------------------------------------*/
 void armRaise(){
-  if(arm_level<2){
-    arm_level_previous = arm_level;
-		arm_level = arm_level +1;
+arm_level_previous = arm_level;
+  if(arm_level == 2){
+		arm_level = 0;
+  }else{
+		arm_level = arm_level + 1;
   }
 }
 void armDown(){
-  if(arm_level>0){
-    arm_level_previous = arm_level;
-		arm_level = arm_level -1;
+  arm_level_previous = arm_level;
+  if(arm_level == 0){
+		arm_level = 2;
+  }else{
+		arm_level = arm_level - 1;
   }
+}
+void idleToggle(){
+    idle_flag = idle_flag==1?0:1;
 }
 // void intakeForward(){
 //   if(intakeDirection != 1)
@@ -116,11 +124,12 @@ void usercontrol(void) {
   bool Controller1UpDownButtonsControlMotorsStopped = true;
   //bool DrivetrainLNeedsToBeStopped_Controller1 = true;
   //bool DrivetrainRNeedsToBeStopped_Controller1 = true;
-  int access = 0;
   //raise arm 0->1 1->2
   Controller1.ButtonL1.pressed(armRaise);//every time Button L1 is pressed function() is run
   //put down arm 2->1 1->0
   Controller1.ButtonL2.pressed(armDown);//every time Button L1 is pressed function() is run
+  //Button A toggle access
+  Controller1.ButtonA.pressed(idleToggle);//every time Button L1 is pressed function() is run
   //intake forward
   //Controller1.ButtonL1.pressed(intakeForward);//every time Button L1 is pressed function() is run
   //intake backward
@@ -188,7 +197,7 @@ void usercontrol(void) {
       Intake.spin(reverse);
       Contoller1RightShouldControlMotorsStopped = false;
     } else  {
-      if(access==1){
+      if(idle_flag==1){
         Intake.spin(fwd,5,pct);
       }else{
         Intake.stop();
@@ -196,15 +205,10 @@ void usercontrol(void) {
       // set the toggle so that we don't constantly tell the motor to stop when the buttons are released
       Contoller1RightShouldControlMotorsStopped = true;
     }
-    //Button A toggle access
-    if(Controller1.ButtonA.pressing()){
-      access = access==1?0:1;
-    }
-  
     //
     if(arm_level != arm_level_previous){
       Tray.rotateTo(tray_position[arm_level], rotationUnits::deg,false);
-      Arm.rotateTo(arm_position[arm_level], rotationUnits::deg);
+      Arm.rotateTo(arm_position[arm_level], rotationUnits::deg,false);
       arm_level_previous = arm_level ;
     }   
     // check the Up/Down Buttons status to control Tray
