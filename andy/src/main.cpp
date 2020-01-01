@@ -29,12 +29,12 @@ int idle_flag = 0;
 int arm_level = 0;
 int arm_level_previous = -1;
 //arm position 0 - ground 1 - lower tower 2 - middle tower level
-int arm_position[3] =  {0, 310, 390};
+int arm_position[4] =  {0, 40, 310, 390};
 
 //int intakeDirection = 0;
-
+int Tray_Velocity = 60 ;
 int tray_max_degrees = 880 ;
-int tray_position[3] =  {0, 200, 220};
+int tray_position[4] =  {0,20, 180, 200};
 // define your global instances of motors and other devices here
 
 /*---------------------------------------------------------------------------*/
@@ -83,7 +83,7 @@ void autonomous(void) {
 /*---------------------------------------------------------------------------*/
 void armRaise(){
 arm_level_previous = arm_level;
-  if(arm_level == 2){
+  if(arm_level == 3){
 		arm_level = 0;
   }else{
 		arm_level = arm_level + 1;
@@ -92,7 +92,7 @@ arm_level_previous = arm_level;
 void armDown(){
   arm_level_previous = arm_level;
   if(arm_level == 0){
-		arm_level = 2;
+		arm_level = 3;
   }else{
 		arm_level = arm_level - 1;
   }
@@ -213,8 +213,8 @@ void usercontrol(void) {
     }   
     // check the Up/Down Buttons status to control Tray
     if (Controller1.ButtonUp.pressing() && Tray.position(rotationUnits::deg)<tray_max_degrees) {
-      double speed = (1000 - Tray.position(rotationUnits::deg))/ 13 ;
-      Tray.setVelocity(speed, pct);
+      //double speed = (1000 - Tray.position(rotationUnits::deg))/ 13 ;
+      Tray.setVelocity(Tray_Velocity, pct);
       Tray.spin(forward);
       Controller1UpDownButtonsControlMotorsStopped = false;
     } else if (Controller1.ButtonDown.pressing() && Tray.position(rotationUnits::deg)>0) {
