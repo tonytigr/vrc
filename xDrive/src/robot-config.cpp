@@ -182,7 +182,7 @@ void moveCordinateGyro(double x1, double y1, int maxTurnPower, int minTurnPower,
 		RBMotor.resetPosition();
     //check if distance error is within acceptance
     while ((distanceError<0?-distanceError:distanceError) > ACCEPTED_DISTANCE_ERROR){
-      if((distanceError<0?-distanceError:distanceError) >= SLOW_DOWN_DISTANCE)
+      if((distanceError<0?-distanceError:distanceError) >= SLOW_DOWN_DISTANCE )
           //use max power before slow down distance
           calculatedSpeed = maxTurnPower ;
       else{
