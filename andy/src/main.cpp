@@ -25,16 +25,6 @@ using namespace vex;
 // A global instance of competition
 competition Competition;
 
-int idle_flag = 0;
-int arm_level = 0;
-int arm_level_previous = -1;
-//arm position 0 - ground 1 - lower tower 2 - middle tower level
-int arm_position[4] =  {0, 40, 310, 390};
-
-//int intakeDirection = 0;
-int Tray_Velocity = 60 ;
-int tray_max_degrees = 880 ;
-int tray_position[4] =  {0,20, 180, 200};
 // define your global instances of motors and other devices here
 
 /*---------------------------------------------------------------------------*/
@@ -69,7 +59,7 @@ void autonomous(void) {
   // ..........................................................................
   // Insert autonomous user code here.
   // ..........................................................................
-  run_auto_15();
+  run_auto_60();
    }
 
 /*---------------------------------------------------------------------------*/
@@ -82,7 +72,7 @@ void autonomous(void) {
 /*  You must modify the code to add your own robot specific commands here.   */
 /*---------------------------------------------------------------------------*/
 void armRaise(){
-arm_level_previous = arm_level;
+  arm_level_previous = arm_level;
   if(arm_level == 3){
 		arm_level = 0;
   }else{
@@ -98,7 +88,7 @@ void armDown(){
   }
 }
 void idleToggle(){
-    idle_flag = idle_flag==1?0:1;
+    idle_flag = idle_flag==1? 0:1;
 }
 // void intakeForward(){
 //   if(intakeDirection != 1)
@@ -117,79 +107,23 @@ void usercontrol(void) {
   // define a task that will handle monitoring inputs from Controller1
   // process the controller input every 20 milliseconds
   // update the motors based on the input values
-  // VEXcode generated functions
-  // define variables used for controlling motors based on controller inputs
   bool Contoller1RightShouldControlMotorsStopped = true;
-  //bool Controller1LeftShoulderControlMotorsStopped = true;
   bool Controller1UpDownButtonsControlMotorsStopped = true;
-  //bool DrivetrainLNeedsToBeStopped_Controller1 = true;
-  //bool DrivetrainRNeedsToBeStopped_Controller1 = true;
-  //raise arm 0->1 1->2
-  Controller1.ButtonL1.pressed(armRaise);//every time Button L1 is pressed function() is run
-  //put down arm 2->1 1->0
-  Controller1.ButtonL2.pressed(armDown);//every time Button L1 is pressed function() is run
+  //raise arm 0->1 1->2 2->3 3->1
+  Controller1.ButtonL1.pressed(armDown);//every time Button L1 is pressed function() is run
+  //put down arm 3->2 2->1 1->0 0->3
+  Controller1.ButtonL2.pressed(armRaise);//every time Button L1 is pressed function() is run
   //Button A toggle access
   Controller1.ButtonA.pressed(idleToggle);//every time Button L1 is pressed function() is run
-  //intake forward
-  //Controller1.ButtonL1.pressed(intakeForward);//every time Button L1 is pressed function() is run
-  //intake backward
-  //Controller1.ButtonL2.pressed(intakeBackward);//every time Button L1 is pressed function() is run
   while(true) { 
     // calculate the drivetrain motor velocities from the controller joystick axies
     // left = Axis3 + Axis1
     // right = Axis3 - Axis1
-    int drivetrainLeftSideSpeed = Controller1.Axis3.position() + Controller1.Axis1.position();
-    int drivetrainRightSideSpeed = Controller1.Axis3.position() - Controller1.Axis1.position();
-    /* // check if the value is inside of the deadband range
-    if (drivetrainLeftSideSpeed < 5 && drivetrainLeftSideSpeed > -5) {
-      // check if the left motor has already been stopped
-      if (DrivetrainLNeedsToBeStopped_Controller1) {
-        // stop the left drive motor
-        LeftDriveSmart.stop();
-        // tell the code that the left motor has been stopped
-        DrivetrainLNeedsToBeStopped_Controller1 = false;
-      }
-    } else {  
-      // reset the toggle so that the deadband code knows to stop the left motor next time the input is in the deadband range
-      DrivetrainLNeedsToBeStopped_Controller1 = true;
-    }
-    // check if the value is inside of the deadband range
-    if (drivetrainRightSideSpeed < 5 && drivetrainRightSideSpeed > -5) {
-      // check if the right motor has already been stopped
-      if (DrivetrainRNeedsToBeStopped_Controller1) {
-        // stop the right drive motor
-        RightDriveSmart.stop();
-        // tell the code that the right motor has been stopped
-        DrivetrainRNeedsToBeStopped_Controller1 = false;
-      }
-    } else {
-      // reset the toggle so that the deadband code knows to stop the right motor next time the input is in the deadband range
-      DrivetrainRNeedsToBeStopped_Controller1 = true;
-    }
-    // only tell the left drive motor to spin if the values are not in the deadband range
-    if (DrivetrainLNeedsToBeStopped_Controller1) { */
-      LeftDriveSmart.setVelocity(drivetrainLeftSideSpeed, percent);
-      LeftDriveSmart.spin(forward);
-    // }
-    // // only tell the right drive motor to spin if the values are not in the deadband range
-    // if (DrivetrainRNeedsToBeStopped_Controller1) {
-      RightDriveSmart.setVelocity(drivetrainRightSideSpeed, percent);
-      RightDriveSmart.spin(forward);
-    // }
-    // check the ButtonL1/ButtonL2 status to control Arm
-/*     if (Controller1.ButtonL1.pressing()) {
-      Arm.setStopping(brake);
-      Arm.spin(reverse);
-      Controller1LeftShoulderControlMotorsStopped = false;
-    } else if (Controller1.ButtonL2.pressing()) {
-      Arm.spin(fwd);
-      Controller1LeftShoulderControlMotorsStopped = false;
-    } else if (!Controller1LeftShoulderControlMotorsStopped) {
-      Arm.stop();
-      // set the toggle so that we don't constantly tell the motor to stop when the buttons are released
-      Controller1LeftShoulderControlMotorsStopped = true;
-    }
- */    // check the ButtonR1/ButtonR2 status to control Intake
+    LeftDriveSmart.setVelocity(Controller1.Axis3.position() + Controller1.Axis1.position(), percent);
+    LeftDriveSmart.spin(forward);
+    RightDriveSmart.setVelocity(Controller1.Axis3.position() - Controller1.Axis1.position(), percent);
+    RightDriveSmart.spin(forward);
+    // check the ButtonR1/ButtonR2 status to control Intake
     if (Controller1.ButtonR1.pressing()) {
       Intake.spin(fwd);
       Contoller1RightShouldControlMotorsStopped = false;
@@ -205,14 +139,8 @@ void usercontrol(void) {
       // set the toggle so that we don't constantly tell the motor to stop when the buttons are released
       Contoller1RightShouldControlMotorsStopped = true;
     }
-    //
-    if(arm_level != arm_level_previous){
-      Tray.rotateTo(tray_position[arm_level], rotationUnits::deg,false);
-      Arm.rotateTo(arm_position[arm_level], rotationUnits::deg,false);
-      arm_level_previous = arm_level ;
-    }   
     // check the Up/Down Buttons status to control Tray
-    if (Controller1.ButtonUp.pressing() && Tray.position(rotationUnits::deg)<tray_max_degrees) {
+    if (Controller1.ButtonUp.pressing() && Tray.position(rotationUnits::deg) < tray_max_degrees) {
       //double speed = (1000 - Tray.position(rotationUnits::deg))/ 13 ;
       Tray.setVelocity(Tray_Velocity, pct);
       Tray.spin(forward);
@@ -236,8 +164,6 @@ void usercontrol(void) {
 //
 int main() {
   // Set up callbacks for autonomous and driver control periods.
-  Tray.setBrake(brake);
-   Intake.setVelocity(100, pct);
   Competition.autonomous(autonomous);
   Competition.drivercontrol(usercontrol);
 
