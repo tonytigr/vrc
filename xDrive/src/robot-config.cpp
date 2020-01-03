@@ -11,13 +11,13 @@ motor LBMotor = motor(PORT17, ratio18_1, false);
 motor RFMotor = motor(PORT4, ratio18_1, false);
 motor RBMotor = motor(PORT9, ratio18_1, false);
 
-motor LeftIntake = motor(PORT6, ratio36_1, false);
-motor RightIntake = motor(PORT10, ratio36_1, true);
+motor LeftIntake = motor(PORT6, ratio36_1, true);
+motor RightIntake = motor(PORT8, ratio36_1, true);
 motor_group Intake = motor_group(LeftIntake, RightIntake);
 
 controller Controller1 = controller(primary);
 motor Arm = motor(PORT8, ratio36_1, false);
-motor Tray = motor(PORT2, ratio36_1, false);  
+motor Tray = motor(PORT2, ratio36_1, true);  
 
 gyro TurnGyroSmart = gyro(Brain.ThreeWirePort.A);
 

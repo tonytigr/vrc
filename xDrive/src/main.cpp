@@ -113,14 +113,14 @@ void usercontrol(void) {
 
     // check the ButtonR1/ButtonR2 status to control Intake
     if (Controller1.ButtonR1.pressing()) {
-      Intake.spin(fwd);
+      Intake.spin(vex::directionType::rev);
       Contoller1RightShouldControlMotorsStopped = false;
     } else if (Controller1.ButtonR2.pressing()) {
-      Intake.spin(reverse);
+      Intake.spin(vex::directionType::fwd);
       Contoller1RightShouldControlMotorsStopped = false;
     } else  {
       if(idle_flag==1){
-        Intake.spin(fwd,5,pct);
+        Intake.spin(reverse,5,pct);
       }else{
         Intake.stop();
       }
@@ -129,7 +129,7 @@ void usercontrol(void) {
     }
 
     // check the Up/Down Buttons status to control Tray
-    if (Controller1.ButtonUp.pressing() && Tray.position(rotationUnits::deg) < tray_max_degrees) {
+    if (Controller1.ButtonUp.pressing() && Tray.position(rotationUnits::deg) < 9999) {
       //double speed = (1000 - Tray.position(rotationUnits::deg))/ 13 ;
       Tray.setVelocity(Tray_Velocity, pct);
       Tray.spin(forward);

@@ -6,21 +6,15 @@ void blue_square(){
     //lift tray and arm to release extension
 
     //lift tray and arm to release extension
-    Arm.setStopping(brake);
     Tray.setVelocity(100, pct);
     Intake.setVelocity(100, pct);
     Intake.spin(reverse);
     Tray.rotateTo(330,degrees, false);
-    Arm.setVelocity(100, pct);
-    Arm.rotateTo(200,deg,true);
     //put down tray and arm
     Tray.setVelocity(100, pct);
-    Arm.rotateTo(0,deg,false);
     wait(0.5, seconds);
     Tray.rotateTo(0,degrees, true);
-    Arm.setVelocity(60, pct);
     Intake.stop();
-    Arm.rotateTo(12,deg,false);
     Controller1.Screen.print("gyro=11");
     //turn on intake
     task::sleep(200);
@@ -44,7 +38,6 @@ void blue_square(){
     TurnWithGyro(132, 20, 2 ,0.4);
     task::sleep(100); 
     //move forward
-    Arm.rotateTo(0,deg,false);
     Intake.setVelocity(10, pct);
     Intake.spin(reverse);
     moveCordinateGyro(0, 370, 50, 2, 0.3);
