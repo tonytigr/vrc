@@ -69,6 +69,7 @@ Arm.setStopping(hold);
   }
   Tray.setBrake(brake);
   Intake.setVelocity(100, pct);
+  TurnGyroSmart.resetHeading();
   //
   task arm_task(arm_task_function);
   // reset the screen now that the calibration is complete
