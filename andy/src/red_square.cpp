@@ -9,6 +9,10 @@ void red_square(){
     Arm.setStopping(brake);
     Intake.setVelocity(100, pct);
     Intake.spin(reverse);
+    //
+    // arm_level = 2;
+    // task::sleep(2000);
+
     Arm.setVelocity(60, pct);
     Arm.rotateTo(60,deg,false);
     Tray.setVelocity(50, pct);
@@ -16,9 +20,9 @@ void red_square(){
     wait(0.5, seconds);
     Tray.setVelocity(100, pct);
     Tray.rotateTo(0,degrees, true);
-    arm_level = 1;
-    // Arm.setVelocity(100, pct);
-    // Arm.rotateTo(12,deg,true);
+    //arm_level = 1;
+    Arm.setVelocity(100, pct);
+    Arm.rotateTo(25,deg,true);
     //put down tray and arm
 //    Arm.setVelocity(60, pct);
 //    Arm.rotateTo(0,deg,false);
@@ -30,27 +34,28 @@ void red_square(){
     Intake.spin(directionType::fwd);
     
     //move forward at half power
-    Drivetrain.setDriveVelocity(30, pct );
+    Drivetrain.setDriveVelocity(20, pct );
     Drivetrain.turnToHeading(0, rotationUnits::deg,true);
     task::sleep(100);
-    Drivetrain.driveFor( 1300, mm ,true);
+    Drivetrain.driveFor( 900, mm ,true);
     task::sleep(100);
-
+    
+    //stop intake
+    Intake.stop();
     
     //move back
     Drivetrain.setDriveVelocity(30, pct );
     Drivetrain.turnToHeading(0, rotationUnits::deg,true);
     task::sleep(100);
     Drivetrain.setDriveVelocity(90, pct );
-    Drivetrain.driveFor( -800, mm ,true);
+    Drivetrain.driveFor( -500, mm ,true);
     task::sleep(100);
 
-    //stop intake
-    Intake.stop();
+    
 
     //turn left toward blue square
     Drivetrain.setDriveVelocity(30, pct );
-    Drivetrain.turnToHeading(132, rotationUnits::deg,true);
+    Drivetrain.turnToHeading(110, rotationUnits::deg,true);
     task::sleep(100);
     Drivetrain.setDriveVelocity(90, pct);
     Drivetrain.setTurnVelocity(90, pct);

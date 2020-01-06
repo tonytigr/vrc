@@ -59,7 +59,8 @@ void autonomous(void) {
   // ..........................................................................
   // Insert autonomous user code here.
   // ..........................................................................
-  run_auto_60();
+  vexcodeInit();
+  run_auto();
    }
 
 /*---------------------------------------------------------------------------*/
@@ -103,6 +104,7 @@ void idleToggle(){
 //     intakeDirection = 0;
 // }
 void usercontrol(void) {
+  vexcodeInit(); 
   // User control code here, inside the loop
   // define a task that will handle monitoring inputs from Controller1
   // process the controller input every 20 milliseconds
@@ -115,7 +117,11 @@ void usercontrol(void) {
   Controller1.ButtonL2.pressed(armRaise);//every time Button L1 is pressed function() is run
   //Button A toggle access
   Controller1.ButtonA.pressed(idleToggle);//every time Button L1 is pressed function() is run
+    Controller1.Screen.clearScreen();
   while(true) { 
+    Controller1.Screen.setCursor( 1, 1 );
+    Controller1.Screen.print("gyro=%f",TurnGyroSmart.heading());
+
     // calculate the drivetrain motor velocities from the controller joystick axies
     // left = Axis3 + Axis1
     // right = Axis3 - Axis1

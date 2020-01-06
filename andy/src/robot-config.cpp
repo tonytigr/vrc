@@ -61,7 +61,7 @@ Arm.setStopping(hold);
   Brain.Screen.setCursor(2, 1);
   // calibrate the drivetrain gyro
   wait(200, msec);
-  TurnGyroSmart.calibrate();
+  TurnGyroSmart.calibrate(138);
   Brain.Screen.print("Calibrating Gyro for Drivetrain");
   // wait for the gyro calibration process to finish
   while (TurnGyroSmart.isCalibrating()) {
@@ -69,7 +69,7 @@ Arm.setStopping(hold);
   }
   Tray.setBrake(brake);
   Intake.setVelocity(100, pct);
-  TurnGyroSmart.resetHeading();
+  TurnGyroSmart.setHeading(0, rotationUnits::deg);
   //
   task arm_task(arm_task_function);
   // reset the screen now that the calibration is complete
