@@ -72,6 +72,10 @@ void autonomous(void) {
 /*                                                                           */
 /*  You must modify the code to add your own robot specific commands here.   */
 /*---------------------------------------------------------------------------*/
+void trayDown(){ 
+	Tray.setVelocity(100, pct); 
+	Tray.rotateTo(0, rotationUnits::deg, false);
+}
 void armRaise(){
   arm_level_previous = arm_level;
   if(arm_level == 3){
@@ -118,7 +122,9 @@ void usercontrol(void) {
   //Button A toggle access
   Controller1.ButtonA.pressed(idleToggle);//every time Button L1 is pressed function() is run
     Controller1.Screen.clearScreen();
-  while(true) { 
+ //tray Down -> level 0 
+  Controller1.ButtonLeft.pressed(trayDown);//every time Button Left is pressed function() is run
+while(true) { 
     Controller1.Screen.setCursor( 1, 1 );
     Controller1.Screen.print("gyro=%f",TurnGyroSmart.heading());
 
